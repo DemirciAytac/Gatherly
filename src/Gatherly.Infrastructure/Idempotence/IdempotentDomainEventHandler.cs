@@ -1,0 +1,54 @@
+﻿using Gatherly.Domain.DomainEvents;
+using Gatherly.Domain.Primitives;
+using Gatherly.Persistence;
+using Gatherly.Persistence.Outbox;
+using MediatR;
+using Microsoft.AspNetCore.Components.Forms;
+using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Gatherly.Infrastructure.Idempotence
+{
+    public sealed class IdempotentDomainEventHandler<TDomainEvent> : INotificationHandler<TDomainEvent>
+        where TDomainEvent : DomainEvent
+    {
+        private readonly INotificationHandler<TDomainEvent> _decorated;
+        private readonly ApplicationDbContext _dbContext;
+
+        public IdempotentDomainEventHandler(INotificationHandler<TDomainEvent> decorated, ApplicationDbContext dbContext)
+        {
+            _decorated = decorated;
+            _dbContext = dbContext;
+        }
+
+        public async Task Handle(TDomainEvent notification, CancellationToken cancellationToken)
+        {
+            string consumer = _decorated.GetType().Name;
+            if (await _dbContext.Set<OutboxMessageConsumer>().AnyAsync(
+                outboxMessageConsumer => 
+                        outboxMessageConsumer.Id == notification.Id && 
+                        outboxMessageConsumer.Name == consumer,
+                        cancellationToken
+                ))
+            {
+                return;
+            }
+
+            await _decorated.Handle(notification, cancellationToken);
+
+            _dbContext.Set<OutboxMessageConsumer>().Add(
+                new OutboxMessageConsumer()
+                {
+                    Id = notification.Id,
+                    Name = consumer
+                });
+
+            await _dbContext.SaveChangesAsync();
+
+        }
+    }
+}

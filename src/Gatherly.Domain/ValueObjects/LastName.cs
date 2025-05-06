@@ -1,5 +1,6 @@
 ﻿using Gatherly.Domain.Exceptions;
 using Gatherly.Domain.Primitives;
+using Gatherly.Domain.Shared;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,16 +27,16 @@ namespace Gatherly.Domain.ValueObjects
             //Bu value objectin extra propertyleri olursa buraya eklenecek.
         }
 
-        public static LastName Create(string lastName)
+        public static Result<LastName> Create(string lastName)
         {
             if (string.IsNullOrWhiteSpace(lastName))
             {
-                throw new ArgumentNullException($"{nameof(lastName)} is empty.");
+                return Result.Failure<LastName>(new Error("LastName.Empty", "Last name is empty."));
             }
 
             if (lastName.Length > MaxLength)
             {
-                throw new InvalidLenghtException($"{nameof(lastName)} is too long.");
+                return Result.Failure<LastName>(new Error("LastName.TooLong", "Last name is too long."));
             }
 
             return new LastName(lastName);

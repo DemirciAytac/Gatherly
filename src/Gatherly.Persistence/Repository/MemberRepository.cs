@@ -26,7 +26,7 @@ namespace Gatherly.Persistence.Repository
 
         public async Task<Member> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
         {
-            return await _dbContext.Set<Member>().FirstOrDefaultAsync(x => x.Id == id);
+            return await _dbContext.Set<Member>().AsNoTracking().Include(x => x.Addresses).FirstOrDefaultAsync(x => x.Id == id);
         }
 
         public async Task<bool> IsEmailUniqueAsync(Email email, CancellationToken cancellationToken = default)

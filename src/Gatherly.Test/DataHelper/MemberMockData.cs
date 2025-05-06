@@ -1,4 +1,5 @@
-﻿using Gatherly.Application.Members.Queries.GetMemberById;
+﻿using Gatherly.Application.DTOs;
+using Gatherly.Application.Members.Queries.GetMemberById;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +12,12 @@ namespace Gatherly.Test.DataHelper
     {
         public static MemberResponse GetFakeMemberResponse(Guid id)
         {
-            return new MemberResponse(id, "aytac.demirci92@gmail.com");
+            return new MemberResponse(id,
+                                      "aytac.demirci92@gmail.com",
+                                      new List<AddressDTO>()
+                                      { new AddressDTO("sefer sok", "kastamonu", "37632"),
+                                         new AddressDTO("düzdar sok", "sivas", "58413")
+                                      }); ;
         }
     }
 }

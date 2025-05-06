@@ -197,6 +197,37 @@ namespace Gatherly.Persistence.Migrations
 
             modelBuilder.Entity("Gatherly.Domain.Entities.Member", b =>
                 {
+                    b.OwnsMany("Gatherly.Domain.ValueObjects.Address", "Addresses", b1 =>
+                        {
+                            b1.Property<Guid>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<string>("City")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(max)");
+
+                            b1.Property<Guid>("MemberId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<string>("Street")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(max)");
+
+                            b1.Property<string>("ZipCode")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(max)");
+
+                            b1.HasKey("Id");
+
+                            b1.HasIndex("MemberId");
+
+                            b1.ToTable("MemberAddresses", (string)null);
+
+                            b1.WithOwner()
+                                .HasForeignKey("MemberId");
+                        });
+
                     b.OwnsOne("Gatherly.Domain.ValueObjects.Email", "Email", b1 =>
                         {
                             b1.Property<Guid>("MemberId")
@@ -250,6 +281,8 @@ namespace Gatherly.Persistence.Migrations
                             b1.WithOwner()
                                 .HasForeignKey("MemberId");
                         });
+
+                    b.Navigation("Addresses");
 
                     b.Navigation("Email")
                         .IsRequired();

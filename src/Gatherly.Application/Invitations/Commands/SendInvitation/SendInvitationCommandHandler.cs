@@ -2,6 +2,7 @@
 using Gatherly.Application.Common.Exceptions;
 using Gatherly.Domain.Entities;
 using Gatherly.Domain.Repositories;
+using Gatherly.Domain.Shared;
 using MediatR;
 using System;
 using System.Collections.Generic;
@@ -50,9 +51,15 @@ namespace Gatherly.Application.Invitations.Commands.SendInvitation
             }
 
 
-            var invitation = gathering.SendInvitation(member);
+            Result<Invitation> invitationResult = gathering.SendInvitation(member);
 
-            _invatationRepository.Add(invitation);
+            if (invitationResult.IsFailure)
+            {
+                // Log error
+                return Unit.Value;
+            }
+
+            _invatationRepository.Add(invitationResult.Value);
 
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 

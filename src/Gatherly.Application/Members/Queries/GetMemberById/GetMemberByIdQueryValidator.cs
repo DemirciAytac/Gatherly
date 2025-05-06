@@ -11,7 +11,7 @@ namespace Gatherly.Application.Members.Queries.GetMemberById
     {
         public GetMemberByIdQueryValidator()
         {
-            RuleFor(x => x.memberId).NotEmpty().WithMessage($"MemberId değeri null geçilemez.");
+            RuleFor(x => x.MemberId).NotEmpty().WithMessage($"MemberId değeri null geçilemez.");
         }
     }
 }

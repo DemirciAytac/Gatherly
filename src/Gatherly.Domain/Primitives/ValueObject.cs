@@ -28,7 +28,5 @@ namespace Gatherly.Domain.Primitives
             return GetAtomicValues()
                 .Aggregate(default(int), HashCode.Combine);
         }
-
-
     }
 }

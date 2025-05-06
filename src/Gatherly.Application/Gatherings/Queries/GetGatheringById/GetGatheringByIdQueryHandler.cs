@@ -1,11 +1,12 @@
 ﻿
-
-using Gatherly.Application.Absractions.Messaging;
+using Gatherly.Application.Abstractions.Messaging;
 using Gatherly.Application.Attendees.Queries.GetAttendeById;
 using Gatherly.Application.Common.Exceptions;
 using Gatherly.Application.Invitations.Queries.GetInvitationById;
 using Gatherly.Domain.Entities;
+using Gatherly.Domain.Errors;
 using Gatherly.Domain.Repositories;
+using Gatherly.Domain.Shared;
 using System.Linq;
 
 namespace Gatherly.Application.Gatherings.Queries.GetGatheringById
@@ -19,19 +20,14 @@ namespace Gatherly.Application.Gatherings.Queries.GetGatheringById
             _gatheringRepository = gatheringRepository;
         }
 
-        public async Task<GatheringResponse> Handle(GetGatheringByIdQuery request, CancellationToken cancellationToken)
+        public async Task<Result<GatheringResponse>> Handle(GetGatheringByIdQuery request, CancellationToken cancellationToken)
         {
-            if (request is null)
-            {
-                throw new ApplicationArgumentNullException($"{nameof(request)} can not be null.");
-            }
-
             Gathering? gathering = await _gatheringRepository.GetByIdAsync(request.gatheringId, cancellationToken);
            
             
             if(gathering == null)
             {
-                throw new NotFoundException(nameof(Gathering), request.gatheringId);
+                return Result.Failure<GatheringResponse>(DomainErrors.Gathering.NotFound(request.gatheringId));
             }
 
             var response = new GatheringResponse(
@@ -49,7 +45,7 @@ namespace Gatherly.Application.Gatherings.Queries.GetGatheringById
                                             )).ToList()
                                         );
 
-            return response;                         
+            return Result.Success<GatheringResponse>(response );                        
 
         }
     }

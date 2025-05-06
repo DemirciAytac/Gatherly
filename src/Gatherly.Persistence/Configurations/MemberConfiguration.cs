@@ -14,7 +14,6 @@ namespace Gatherly.Persistence.Configurations
     {
         public void Configure(EntityTypeBuilder<Member> builder)
         {
-            //firstname value object persisted as owned entity in EF Core 
 
             builder.OwnsOne(o => o.FirstName, firstname =>
             {
@@ -29,6 +28,14 @@ namespace Gatherly.Persistence.Configurations
             builder.OwnsOne(o => o.Email, email =>
             {
                 email.Property(x => x.Value).HasColumnName("Email");
+            });
+
+            builder.OwnsMany(c => c.Addresses, a =>
+            {
+                a.WithOwner().HasForeignKey("MemberId");
+                a.Property<Guid>("Id"); // Shadow primary key
+                a.HasKey("Id");
+                a.ToTable("MemberAddresses");
             });
         }
     }

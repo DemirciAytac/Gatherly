@@ -1,4 +1,5 @@
-﻿using Gatherly.Application.Absractions.Messaging;
+﻿
+using Gatherly.Application.Abstractions.Messaging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Gatherly.Application.Members.Queries.GetMemberById
 {
-    public sealed record GetMemberByIdQuery(Guid memberId) : IQuery<MemberResponse>;
+    public sealed record GetMemberByIdQuery(Guid MemberId) : IQuery<MemberResponse>;
 
     
 }

@@ -1,17 +1,12 @@
-﻿using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Gatherly.Domain.Shared;
+using MediatR;
 
-namespace Gatherly.Application.Absractions.Messaging
+namespace Gatherly.Application.Abstractions.Messaging;
+
+public interface ICommand : IRequest<Result>
 {
-    public interface ICommand : IRequest
-    {
-    }
+}
 
-    public interface ICommand<TResponse> : IRequest<TResponse>
-    {
-    }
+public interface ICommand<TResponse> : IRequest<Result<TResponse>>
+{
 }

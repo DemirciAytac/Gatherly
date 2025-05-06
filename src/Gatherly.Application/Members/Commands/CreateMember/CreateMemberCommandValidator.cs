@@ -27,8 +27,8 @@ namespace Gatherly.Application.Members.Commands.CreateMember
             RuleFor(x => x.LastName).NotEmpty().MaximumLength(LastName.MaxLength);
         }
         public async Task<bool> BeUniqueEmail(string email, CancellationToken cancellationToken)
-        {           
-            return await _memberRepository.IsEmailUniqueAsync(Email.Create(email));
+        {
+              return await _memberRepository.IsEmailUniqueAsync(Email.Create(email).Value);
         }
     }
 }

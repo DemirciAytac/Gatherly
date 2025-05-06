@@ -1,14 +1,13 @@
-﻿using Gatherly.Application.Absractions.Messaging;
-using Gatherly.Application.Common.Exceptions;
+﻿
+
+using Gatherly.Application.Abstractions.Messaging;
 using Gatherly.Domain.Entities;
+using Gatherly.Domain.Errors;
 using Gatherly.Domain.Repositories;
+using Gatherly.Domain.Shared;
 using Gatherly.Domain.ValueObjects;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace Gatherly.Application.Members.Commands.CreateMember
 {
@@ -23,27 +22,36 @@ namespace Gatherly.Application.Members.Commands.CreateMember
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<Guid> Handle(CreateMemberCommand request, CancellationToken cancellationToken)
+        public async Task<Result<Guid>> Handle(CreateMemberCommand request, CancellationToken cancellationToken)
         {
-            if (request is null)
+
+            Result<Email> emailResult = Email.Create(request.Email);
+            Result<FirstName> firstNameResult = FirstName.Create(request.FirstName);
+            Result<LastName> lastName = LastName.Create(request.LastName);
+
+            if (!await _memberRepository.IsEmailUniqueAsync(emailResult.Value, cancellationToken))
             {
-                throw new ApplicationArgumentNullException($"{nameof(request)} can not be null.");
+                return Result.Failure<Guid>(DomainErrors.Gathering.AlreadyPassed);
             }
 
-            var email = Email.Create(request.Email);
-            var firstName = FirstName.Create(request.FirstName);
-            var lastName = LastName.Create(request.LastName);
+            // Address oluşturma ve doğrulama
+            var addressResults = request.Addresses
+                .Select(a => Address.Create(a.city, a.street, a.zipCode))
+                .ToList();
 
-            var isEmailUniqueAsync = await _memberRepository
-                .IsEmailUniqueAsync(email, cancellationToken);
+            var member = Member.Create(Guid.NewGuid(), emailResult.Value, firstNameResult.Value, lastName.Value);
 
-            var member = Member.Create(Guid.NewGuid(), email, firstName, lastName, isEmailUniqueAsync);
-
-             _memberRepository.Add(member);
+            // Address'leri member'a ekle
+            foreach (var addressResult in addressResults)
+            {
+                member.AddAddress(addressResult.Value);
+            }
+            _memberRepository.Add(member);
 
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-            return member.Id;
+            return Result<Guid>.Success(member.Id);
         }
+
     }
 }

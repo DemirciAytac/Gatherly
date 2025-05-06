@@ -1,7 +1,11 @@
 ﻿using Gatherly.Application.Absractions;
+using Gatherly.Application.Abstractions.Messaging;
 using Gatherly.Application.Common.Exceptions;
+using Gatherly.Domain.Entities;
 using Gatherly.Domain.Enums;
+using Gatherly.Domain.Errors;
 using Gatherly.Domain.Repositories;
+using Gatherly.Domain.Shared;
 using MediatR;
 using System;
 using System.Collections.Generic;
@@ -11,7 +15,7 @@ using System.Threading.Tasks;
 
 namespace Gatherly.Application.Invitations.Commands.AcceptInvitation
 {
-    internal sealed class AcceptInvitationCommandHandler : IRequestHandler<AcceptInvitationCommand>
+    internal sealed class AcceptInvitationCommandHandler : ICommandHandler<AcceptInvitationCommand>
     {
         private readonly IInvitationRepository _invatationRepository;
         private readonly IMemberRepository _memberRepository;
@@ -37,7 +41,7 @@ namespace Gatherly.Application.Invitations.Commands.AcceptInvitation
            // _emailService = emailService;
         }
 
-        public async Task<Unit> Handle(AcceptInvitationCommand request, CancellationToken cancellationToken)
+        public async Task<Result> Handle(AcceptInvitationCommand request, CancellationToken cancellationToken)
         {
             if (request is null)
             {
@@ -48,26 +52,27 @@ namespace Gatherly.Application.Invitations.Commands.AcceptInvitation
             
             if(gathering is null)
             {
-                return Unit.Value;
+                return  Result.Failure(DomainErrors.Gathering.NotFound(request.gatheringId));
             }
 
             var invitation = gathering.Invitations.FirstOrDefault(x => x.Id == request.InvitationId);
 
             if (invitation is null || invitation.Status != InvitationStatus.Pending)
             {
-                return Unit.Value;
+                return Result.Failure(DomainErrors.Invitation.AlreadyAccepted(request.InvitationId));
             }
 
-            var attendee = gathering.AcceptInvitation(invitation);
+            Result<Attendee> attendeeResult = gathering.AcceptInvitation(invitation);
 
-            if(attendee is not null)
+            if (attendeeResult.IsSuccess)
             {
-                _attendeeRepository.Add(attendee);
+                _attendeeRepository.Add(attendeeResult.Value);
             }
-            
+
             await _unitOfWork.SaveChangesAsync(cancellationToken);
-            
-            return Unit.Value;
+
+            return Result.Success();
         }
+
     }
 }

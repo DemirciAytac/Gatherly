@@ -1,7 +1,9 @@
-﻿using Gatherly.Application.Absractions.Messaging;
+﻿
+using Gatherly.Application.Abstractions.Messaging;
 using Gatherly.Application.Common.Exceptions;
 using Gatherly.Domain.Entities;
 using Gatherly.Domain.Repositories;
+using Gatherly.Domain.Shared;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,21 +21,24 @@ namespace Gatherly.Application.Members.Queries.GetMemberById
             _memberRepository = memberRepository;
         }
 
-        public async Task<MemberResponse> Handle(GetMemberByIdQuery request, CancellationToken cancellationToken)
+        public async Task<Result<MemberResponse>> Handle(GetMemberByIdQuery request, CancellationToken cancellationToken)
         {
-            if (request is null)
+            var member = await _memberRepository.GetByIdAsync(
+                       request.MemberId,
+                       cancellationToken);
+
+            if (member is null)
             {
-                throw new ApplicationArgumentNullException($"{nameof(request)} can not be null.");
+                return Result.Failure<MemberResponse>(new Error(
+                    "Member.NotFound",
+                    $"The member with Id {request.MemberId} was not found"));
             }
 
-            var member = await _memberRepository.GetByIdAsync(request.memberId, cancellationToken);
+            var response = new MemberResponse(member.Id, 
+                                              member.Email.Value, 
+                                              member.Addresses.Select(x => new DTOs.AddressDTO(x.Street, x.City,x.ZipCode)).ToList());
 
-            if(member is null)
-            {
-                throw new NotFoundException(nameof(Member), request.memberId);
-            }
-
-            return new MemberResponse(member.Id, member.Email.Value);
+            return Result.Success<MemberResponse>(response);
         }
     }
 }

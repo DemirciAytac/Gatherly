@@ -1,9 +1,11 @@
 using Gatherly.App;
+using Gatherly.App.Extensions;
 using Gatherly.Application;
 using Gatherly.Domain.Repositories;
 using Gatherly.Infrastructure;
 using Gatherly.Persistence;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -20,10 +22,12 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-
+if (app.Environment.IsDevelopment())
+{
     app.UseSwagger();
     app.UseSwaggerUI();
-
+    await app.ApplyMigrationAsync();
+}
 
 app.UseHttpsRedirection();
 

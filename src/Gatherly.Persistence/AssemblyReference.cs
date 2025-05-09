@@ -32,8 +32,11 @@ namespace Gatherly.Persistence
             {
                 var outboxInterceptor = sp.GetService<ConvertDomainEventToOutboxMessageInterceptor>();
                 var auditableInterceptor = sp.GetService<UpdateAuditableEntitiesInterceptor>();
+                var connectionString = configuration.GetConnectionString("Default");
+                var password = Environment.GetEnvironmentVariable("MSSQL_SA_PASSWORD");
+                connectionString = string.Format(connectionString, password);
                 DbContextOptionsBuilder dbContextOptionsBuilder = optionBuilder.UseSqlServer(
-                    configuration.GetConnectionString("Default")
+                    connectionString
                     // ,o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery)
                     ).AddInterceptors(outboxInterceptor, auditableInterceptor);
             });

@@ -1,0 +1,38 @@
+
+services:
+  SqlServerDb:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: sqlserver
+    environment:
+      SA_PASSWORD: "YourStrong@Passw0rd"
+      ACCEPT_EULA: "Y"
+    ports:
+      - "1433:1433"
+    networks:
+      - backend
+    volumes:
+      - mssqldata:/var/opt/mssql
+
+  gatherly.app:
+    container_name: gatherlyapp
+    image: ${DOCKER_REGISTRY-}gatherlyapp
+    ports : 
+    - 5002:80
+    - 5003:443
+    
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - MSSQL_SA_PASSWORD=YourStrong@Passw0rd
+    build:
+      context: .
+      dockerfile: src/Gatherly.App/Dockerfile
+    depends_on:
+            - SqlServerDb
+    networks:
+      - backend
+networks:
+  backend:
+
+volumes:
+  mssqldata:
+

@@ -13,5 +13,6 @@ namespace Gatherly.Domain.Repositories
         Task<Member> GetByIdAsync(Guid id,CancellationToken cancellationToken = default);
         void Add(Member member);   
         Task<bool> IsEmailUniqueAsync(Email email, CancellationToken cancellationToken = default);
+        Task<IEnumerable<Member>> GetByIdWithDapper(Guid id, CancellationToken cancellationToken = default);
     }
 }

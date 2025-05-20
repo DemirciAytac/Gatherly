@@ -1,4 +1,5 @@
-﻿using Gatherly.Domain.Entities;
+﻿using Dapper;
+using Gatherly.Domain.Entities;
 using Gatherly.Domain.Repositories;
 using Gatherly.Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
@@ -14,10 +15,12 @@ namespace Gatherly.Persistence.Repository
     internal sealed class MemberRepository : IMemberRepository
     {
         private readonly ApplicationDbContext _dbContext;
+        private readonly DapperContext _dapperContext;
 
-        public MemberRepository(ApplicationDbContext dbContext)
+        public MemberRepository(ApplicationDbContext dbContext, DapperContext dapperContext)
         {
             _dbContext = dbContext;
+            _dapperContext = dapperContext;
         }
         public void Add(Member member)
         {
@@ -33,6 +36,12 @@ namespace Gatherly.Persistence.Repository
         {
             var result = await _dbContext.Set<Member>().FirstOrDefaultAsync(x => x.Email.Value == email.Value);
             return result is  null ? true : false;
+        }
+
+        public async Task<IEnumerable<Member>> GetByIdWithDapper(Guid id, CancellationToken cancellationToken = default)
+        {
+            using var connection = _dapperContext.CreateConnection();
+            return await connection.QueryAsync<Member>("SELECT * FROM Members");
         }
     }
 }

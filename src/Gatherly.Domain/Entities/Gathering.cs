@@ -8,7 +8,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Gatherly.Domain.Entities
 {
-    public sealed class Gathering : AggregateRoot
+    public sealed class Gathering : AggregateRoot, IAuditableEntity
     {
         private readonly List<Invitation> _invitations = new();
         private readonly List<Attendee> _attendee = new();
@@ -35,6 +35,9 @@ namespace Gatherly.Domain.Entities
         public int NumberOfAttendees { get;  private set; }
         public IReadOnlyCollection<Attendee> Attendees => _attendee;
         public IReadOnlyCollection<Invitation> Invitations => _invitations;
+
+        public DateTime CreatedOnUtc { get; set; }
+        public DateTime? ModifiedOnUtc { get; set; }
 
         public static Gathering Create(
             Guid id, 

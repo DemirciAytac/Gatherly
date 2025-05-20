@@ -27,6 +27,7 @@ namespace Gatherly.Persistence
 
             services.AddSingleton<ConvertDomainEventToOutboxMessageInterceptor>();
             services.AddSingleton<UpdateAuditableEntitiesInterceptor>();
+            services.AddSingleton<DapperContext>();
 
             services.AddDbContext<ApplicationDbContext>((sp, optionBuilder) =>
             {

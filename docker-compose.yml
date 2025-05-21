@@ -28,8 +28,17 @@ services:
       dockerfile: src/Gatherly.App/Dockerfile
     depends_on:
             - SqlServerDb
+   
+  jaeger:
+    image: jaegertracing/jaeger:${JAEGER_VERSION:-latest}
     networks:
       - backend
+    ports:
+      - "16686:16686"
+      - "8888:8888"
+      - "8889:8889"
+      - "4317:4317"
+      - "4318:4318"
 networks:
   backend:
 

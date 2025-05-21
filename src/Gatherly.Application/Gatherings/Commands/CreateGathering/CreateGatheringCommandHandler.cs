@@ -7,10 +7,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Gatherly.Application.Abstractions.Messaging;
+using Gatherly.Domain.Shared;
 
 namespace Gatherly.Application.Gatherings.Commands.CreateGathering
 {
-    public sealed class CreateGatheringCommandHandler : IRequestHandler<CreateGatheringCommand>
+    public sealed class CreateGatheringCommandHandler : ICommandHandler<CreateGatheringCommand>
     {
         private readonly IMemberRepository _memberRepository;
         private readonly IGatheringRepository _gatheringRepository;
@@ -23,7 +25,7 @@ namespace Gatherly.Application.Gatherings.Commands.CreateGathering
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<Unit> Handle(CreateGatheringCommand request, CancellationToken cancellationToken)
+        public async Task<Result> Handle(CreateGatheringCommand request, CancellationToken cancellationToken)
         {
             if (request is null)
             {
@@ -31,27 +33,27 @@ namespace Gatherly.Application.Gatherings.Commands.CreateGathering
             }
 
             var member = await _memberRepository.GetByIdAsync(request.MemberId, cancellationToken);
-            
-            if(member is null)
+
+            if (member is null)
             {
                 throw new NotFoundException(nameof(Gathering), request.MemberId);
             }
 
             var gathering = Gathering.Create(
-                Guid.NewGuid(), 
+                Guid.NewGuid(),
                 member,
                 request.Type,
                 request.ScheduledAtUtc,
-                request.Name, 
+                request.Name,
                 request.Location,
-                request.MaximumNumberOfAttendees, 
+                request.MaximumNumberOfAttendees,
                 request.InvitationsValidBeforeInHours);
 
-             _gatheringRepository.Add(gathering);
+            _gatheringRepository.Add(gathering);
 
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-            return Unit.Value;
+            return Result.Success();
         }
     }
 }

@@ -4,14 +4,15 @@ namespace Gatherly.Domain.Primitives
 {
     public abstract class Entity : IEquatable<Entity>
     {
-        protected  Entity(Guid id)
-        {
-            Id = id;
-        }
         protected Entity()
         {
 
         }
+        protected  Entity(Guid id)
+        {
+            Id = id;
+        }
+
         public Guid Id { get; private init; }
 
         public override bool Equals(object? obj)

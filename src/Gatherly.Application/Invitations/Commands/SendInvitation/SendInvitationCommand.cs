@@ -1,4 +1,5 @@
-﻿using MediatR;
+﻿using Gatherly.Application.Abstractions.Messaging;
+using MediatR;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,5 +8,5 @@ using System.Threading.Tasks;
 
 namespace Gatherly.Application.Invitations.Commands.SendInvitation
 {
-    public sealed record SendInvitationCommand(Guid MemberId, Guid GatheringId) : IRequest<Unit>;
+    public sealed record SendInvitationCommand(Guid MemberId, Guid GatheringId) : ICommand;
 }

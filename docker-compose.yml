@@ -19,7 +19,8 @@ services:
     ports : 
     - 5002:80
     - 5003:443
-    
+    networks:
+      - backend
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - MSSQL_SA_PASSWORD=YourStrong@Passw0rd

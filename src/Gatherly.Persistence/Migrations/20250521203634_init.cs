@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Gatherly.Persistence.Migrations
 {
     /// <inheritdoc />
-    public partial class İNİT : Migration
+    public partial class init : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -67,7 +67,9 @@ namespace Gatherly.Persistence.Migrations
                     Location = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     MaximumNumberOfAttendees = table.Column<int>(type: "int", nullable: true),
                     InvitationsExpireAtUtc = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    NumberOfAttendees = table.Column<int>(type: "int", nullable: false)
+                    NumberOfAttendees = table.Column<int>(type: "int", nullable: false),
+                    CreatedOnUtc = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ModifiedOnUtc = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -75,6 +77,27 @@ namespace Gatherly.Persistence.Migrations
                     table.ForeignKey(
                         name: "FK_Gathering_Member_CreatorId",
                         column: x => x.CreatorId,
+                        principalTable: "Member",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "MemberAddresses",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    City = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Street = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ZipCode = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    MemberId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_MemberAddresses", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_MemberAddresses_Member_MemberId",
+                        column: x => x.MemberId,
                         principalTable: "Member",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -135,6 +158,11 @@ namespace Gatherly.Persistence.Migrations
                 name: "IX_Invitation_GatheringId",
                 table: "Invitation",
                 column: "GatheringId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_MemberAddresses_MemberId",
+                table: "MemberAddresses",
+                column: "MemberId");
         }
 
         /// <inheritdoc />
@@ -145,6 +173,9 @@ namespace Gatherly.Persistence.Migrations
 
             migrationBuilder.DropTable(
                 name: "Invitation");
+
+            migrationBuilder.DropTable(
+                name: "MemberAddresses");
 
             migrationBuilder.DropTable(
                 name: "OutboxMessage");

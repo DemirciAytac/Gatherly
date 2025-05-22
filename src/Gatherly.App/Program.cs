@@ -17,7 +17,7 @@ builder.Services
     .AddPersistence(builder.Configuration);
 builder.Services.AddControllers()
     .AddApplicationPart(Gatherly.Presentation.AssemblyReference.Assembly);
-
+//builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();

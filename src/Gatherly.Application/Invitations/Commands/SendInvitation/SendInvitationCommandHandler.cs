@@ -1,6 +1,8 @@
 ﻿using Gatherly.Application.Absractions;
+using Gatherly.Application.Abstractions.Messaging;
 using Gatherly.Application.Common.Exceptions;
 using Gatherly.Domain.Entities;
+using Gatherly.Domain.Errors;
 using Gatherly.Domain.Repositories;
 using Gatherly.Domain.Shared;
 using MediatR;
@@ -12,7 +14,7 @@ using System.Threading.Tasks;
 
 namespace Gatherly.Application.Invitations.Commands.SendInvitation
 {
-    internal sealed class SendInvitationCommandHandler : IRequestHandler<SendInvitationCommand>
+    internal sealed class SendInvitationCommandHandler : ICommandHandler<SendInvitationCommand>
     {
         private readonly IMemberRepository _memberRepository;
         private readonly IGatheringRepository _gatheringRepository;
@@ -34,7 +36,7 @@ namespace Gatherly.Application.Invitations.Commands.SendInvitation
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<Unit> Handle(SendInvitationCommand request, CancellationToken cancellationToken)
+        public async Task<Result> Handle(SendInvitationCommand request, CancellationToken cancellationToken)
         {
             if (request is null)
             {
@@ -45,9 +47,9 @@ namespace Gatherly.Application.Invitations.Commands.SendInvitation
 
             var gathering = await _gatheringRepository.GetByIdWithCreatorAsync(request.GatheringId, cancellationToken);
 
-            if(member is null || gathering is null)
+            if (member is null || gathering is null)
             {
-                return Unit.Value;
+                return Result.Failure(DomainErrors.Gathering.NotFound(request.GatheringId));
             }
 
 
@@ -56,7 +58,7 @@ namespace Gatherly.Application.Invitations.Commands.SendInvitation
             if (invitationResult.IsFailure)
             {
                 // Log error
-                return Unit.Value;
+                return invitationResult;
             }
 
             _invatationRepository.Add(invitationResult.Value);
@@ -65,7 +67,7 @@ namespace Gatherly.Application.Invitations.Commands.SendInvitation
 
             await _emailService.SendInvitationSentEmailAsync(member, gathering);
 
-            return Unit.Value;
+            return Result.Success();
         }
     }
 }
